@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Chart.js untuk Dashboard Admin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -57,7 +55,7 @@
             </div>
             <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-center sm:justify-end">
                 <button type="button" id="btnDownloadManual" onclick="downloadPDFManual()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
-                    <i class="fa-solid fa-file-pdf"></i> Muat Turun PDF Manual
+                    <i class="fa-solid fa-file-pdf"></i> Muat Turun PDF Saya
                 </button>
                 <button type="button" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-none">
                     <i class="fa-solid fa-rotate-left"></i> Set Semula
@@ -76,7 +74,7 @@
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
                     <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full border border-slate-200">Lampiran 4</span>
                     <span class="text-[10px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                        <i class="fa-solid fa-circle-check mr-1"></i> Auto Sync (Spreadsheet + Link PDF Lajur N)
+                        <i class="fa-solid fa-circle-check mr-1"></i> Auto Sync (Spreadsheet + PDF Drive)
                     </span>
                 </div>
                 
@@ -94,6 +92,20 @@
                     </h1>
                 </div>
                 <p class="text-[11px] sm:text-xs text-slate-500 italic mt-1">(Dilengkapkan oleh pihak industri yang menjalankan Aktiviti IEEP)</p>
+
+                <!-- PAPARAN NAMA PROGRAM & TARIKH PROGRAM (READ-ONLY FOR PUBLIC) -->
+                <div class="mt-4 bg-blue-50/80 border border-blue-200 rounded-xl p-3.5 sm:p-4 text-left max-w-2xl mx-auto shadow-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-500 text-[10px] sm:text-xs uppercase tracking-wider"><i class="fa-solid fa-graduation-cap text-blue-600 mr-1"></i> Nama Program:</span>
+                            <span id="publicNamaProgram" class="font-extrabold text-blue-900 mt-0.5">Memuatkan...</span>
+                        </div>
+                        <div class="flex flex-col sm:border-l sm:border-blue-200 sm:pl-3">
+                            <span class="font-bold text-slate-500 text-[10px] sm:text-xs uppercase tracking-wider"><i class="fa-solid fa-calendar-days text-blue-600 mr-1"></i> Tarikh Program:</span>
+                            <span id="publicTarikhProgram" class="font-extrabold text-blue-900 mt-0.5">Memuatkan...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Form Content -->
@@ -124,7 +136,6 @@
                         <i class="fa-solid fa-list-check text-blue-600"></i> Bahagian B: Pelaksanaan Aktiviti IEEP (Skala Likert)
                     </h2>
                     
-                    <!-- Skala Penilaian Legend -->
                     <div class="bg-blue-50/70 rounded-xl p-3.5 sm:p-4 mb-4 sm:mb-6 border border-blue-100 text-xs">
                         <span class="font-bold text-blue-900 block mb-2"><i class="fa-solid fa-circle-info mr-1"></i> Skala Penilaian:</span>
                         <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-slate-700 text-center font-medium">
@@ -136,7 +147,6 @@
                         </div>
                     </div>
 
-                    <!-- Soalan S1 - S8 -->
                     <div class="space-y-3.5 sm:space-y-4" id="questionsContainer"></div>
                 </div>
 
@@ -165,6 +175,27 @@
                 </div>
 
             </form>
+        </div>
+    </div>
+
+    <!-- POP-UP RESPONDEN: MAKLUM BALAS BERJAYA DITERIMA -->
+    <div id="respondentSuccessModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 text-center relative">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200 shadow-inner">
+                <i class="fa-solid fa-circle-check text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-800 mb-2">Maklum Balas Berjaya Diterima & Disimpan!</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
+                Terima kasih atas kerjasama anda. Maklum balas anda telah selamat direkodkan ke dalam sistem. Sekiranya pegawai dan industri yang sama menghantar semula borang, rekod lama dan fail PDF terdahulu akan dikemaskini secara automatik.
+            </p>
+            <div class="flex flex-col gap-2">
+                <button type="button" id="btnDownloadRespondentPdf" onclick="downloadPDFManual()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Muat Turun Salinan PDF Saya
+                </button>
+                <button type="button" onclick="closeRespondentSuccessModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition-all">
+                    Faham & Tutup
+                </button>
+            </div>
         </div>
     </div>
 
@@ -215,31 +246,63 @@
                     <button type="button" id="tabBtnRecords" onclick="switchAdminTab('records')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 flex-1 sm:flex-none flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-list-check"></i> Rekod Individu
                     </button>
+                    <button type="button" onclick="openProgramModal()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-1">
+                        <i class="fa-solid fa-pen-to-square"></i> Tetapan Program (A & B)
+                    </button>
                     <button type="button" onclick="closeAdminPanel()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- TETAPAN BUKA / TUTUP BORANG (ADMIN CONTROL CARD) -->
-            <div class="bg-slate-100 p-3.5 my-3 rounded-xl border border-slate-200 flex flex-wrap justify-between items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold uppercase text-slate-700">Status Borang:</span>
-                    <span id="adminFormStatusBadge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                        <i class="fa-solid fa-circle-check mr-1"></i> DIBUKA
-                    </span>
+            <!-- KAWALAN PROGRAM & TAPISAN DINAMIK -->
+            <div class="bg-slate-100 p-3.5 my-3 rounded-xl border border-slate-200 space-y-3">
+                
+                <!-- Filter Program Dropdown (Carian Mengikut Lajur O) -->
+                <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-filter text-blue-600 text-base"></i>
+                        <span class="text-xs font-bold text-slate-800 uppercase">Tapis Mengikut Program (Lajur O):</span>
+                    </div>
+                    <div class="w-full sm:w-auto flex-1">
+                        <select id="programFilterSelect" onchange="onProgramFilterChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm font-bold text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="ALL">-- SEMUA PROGRAM (KESELURUHAN REKOD) --</option>
+                        </select>
+                    </div>
                 </div>
-                <button type="button" id="btnToggleFormStatus" onclick="toggleFormStatusAction()" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm flex items-center gap-1.5">
-                    <i class="fa-solid fa-lock"></i> Tutup Borang Maklum Balas
-                </button>
+
+                <div class="flex flex-wrap justify-between items-center gap-3 pt-1">
+                    <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-500 uppercase block text-[10px]">Program Aktif Borang</span>
+                            <span id="displayNamaProgram" class="font-extrabold text-blue-900">Belum Ditetapkan</span>
+                        </div>
+                        <div class="border-l border-slate-300 pl-3">
+                            <span class="font-bold text-slate-500 uppercase block text-[10px]">Tarikh Active</span>
+                            <span id="displayTarikhProgram" class="font-extrabold text-blue-900">Belum Ditetapkan</span>
+                        </div>
+                        <div class="border-l border-slate-300 pl-3">
+                            <span class="font-bold text-slate-500 uppercase block text-[10px]">Status Borang</span>
+                            <span id="adminFormStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                DIBUKA
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btnOverallPdf" onclick="generateOverallPDFReportAction()" class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-pdf"></i> Muat Turun Laporan Keseluruhan (PDF)
+                        </button>
+                        <button type="button" id="btnToggleFormStatus" onclick="toggleFormStatusAction()" class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-lock"></i> Tutup Borang
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- TAB 1: DASHBOARD CARTA & ANALISIS -->
+            <!-- TAB 1: DASHBOARD CARTA & PERATUSAN ANALISIS -->
             <div id="adminTabChartContent" class="flex-1 overflow-y-auto pt-2 space-y-4">
                 
-                <!-- Filter Section & Quick Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Dropdown Filter -->
                     <div class="md:col-span-1 bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
                         <label class="block text-xs font-bold uppercase text-slate-700 mb-1">
                             <i class="fa-solid fa-filter text-blue-600 mr-1"></i> Tapisan Soalan (Filter)
@@ -257,14 +320,13 @@
                         </select>
                     </div>
 
-                    <!-- Kad Ringkasan Statistik -->
                     <div class="md:col-span-2 grid grid-cols-2 gap-3">
                         <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-100 flex items-center gap-3">
                             <div class="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center text-lg font-bold">
                                 <i class="fa-solid fa-users"></i>
                             </div>
                             <div>
-                                <span class="text-[10px] font-bold text-blue-600 uppercase">Jumlah Responden</span>
+                                <span class="text-[10px] font-bold text-blue-600 uppercase">Jumlah Responden Program</span>
                                 <p class="text-lg font-extrabold text-slate-800" id="statTotalResponden">0</p>
                             </div>
                         </div>
@@ -273,14 +335,13 @@
                                 <i class="fa-solid fa-star"></i>
                             </div>
                             <div>
-                                <span class="text-[10px] font-bold text-emerald-700 uppercase">Purata Skor Keseluruhan</span>
+                                <span class="text-[10px] font-bold text-emerald-700 uppercase">Purata Skor Program</span>
                                 <p class="text-lg font-extrabold text-slate-800" id="statAvgScore">0.0 / 5.0</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- PETUNJUK SOALAN DINAMIK BANNER -->
                 <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-4 rounded-xl shadow-md border border-blue-800">
                     <span class="text-[10px] font-bold tracking-widest text-blue-300 uppercase block mb-1">
                         <i class="fa-solid fa-circle-info mr-1"></i> Petunjuk Soalan Dipilih
@@ -291,16 +352,38 @@
                 </div>
 
                 <!-- CARTA BAR CONTAINER -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative min-h-[280px]">
-                    <canvas id="barChartCanvas" class="max-h-[350px] w-full"></canvas>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative min-h-[250px]">
+                    <canvas id="barChartCanvas" class="max-h-[300px] w-full"></canvas>
+                </div>
+
+                <!-- JADUAL ANALISIS PERATUSAN UNTUK SETIAP SOALAN -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-percent text-blue-600"></i> Jadual Analisis Peratusan Bagi Setiap Soalan Dijawab
+                    </h4>
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-300">
+                                <th class="p-2.5 text-center">Soalan</th>
+                                <th class="p-2.5">Item Penilaian</th>
+                                <th class="p-2.5 text-center">Skor 1<br><span class="text-[9px] font-normal text-slate-500">(Sgt Tdk Setuju)</span></th>
+                                <th class="p-2.5 text-center">Skor 2<br><span class="text-[9px] font-normal text-slate-500">(Tdk Setuju)</span></th>
+                                <th class="p-2.5 text-center">Skor 3<br><span class="text-[9px] font-normal text-slate-500">(Neutral)</span></th>
+                                <th class="p-2.5 text-center">Skor 4<br><span class="text-[9px] font-normal text-slate-500">(Setuju)</span></th>
+                                <th class="p-2.5 text-center">Skor 5<br><span class="text-[9px] font-normal text-slate-500">(Sgt Setuju)</span></th>
+                                <th class="p-2.5 text-center">Purata</th>
+                            </tr>
+                        </thead>
+                        <tbody id="percentageTableBody" class="divide-y divide-slate-200">
+                            <!-- Injected by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
 
             </div>
 
-            <!-- TAB 2: REKOD INDIVIDU (Gaya Google Form) -->
+            <!-- TAB 2: REKOD INDIVIDU -->
             <div id="adminTabRecordsContent" class="hidden flex-1 overflow-y-auto pt-2 space-y-4">
-                
-                <!-- Navigation Bar (Next / Prev) -->
                 <div id="navigationBar" class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-wrap justify-between items-center gap-3">
                     <div class="flex items-center gap-2">
                         <button id="btnPrev" onclick="navigateRecord(-1)" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-40">
@@ -312,29 +395,79 @@
                         </button>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="downloadBulkPDFs()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-download"></i> Muat Turun Pukal
-                        </button>
                         <button id="btnSinglePdf" onclick="downloadCurrentRecordPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-file-pdf"></i> PDF Rekod Ini
                         </button>
                     </div>
                 </div>
 
-                <!-- Record Detail Viewer -->
                 <div id="recordViewer" class="space-y-4 p-1">
                     <div class="text-center py-12 text-slate-400">
                         <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
                         <p class="text-xs mt-2">Memuatkan data dari Google Spreadsheet...</p>
                     </div>
                 </div>
-
             </div>
 
         </div>
     </div>
 
-    <!-- POP-UP MODAL APABILA BORANG DITUTUP (FORM CLOSED MODAL) -->
+    <!-- POP-UP MODAL NAMA PROGRAM & TARIKH PROGRAM -->
+    <div id="programInfoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 relative">
+            <button onclick="closeProgramModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <i class="fa-solid fa-calendar-days text-xl"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">Kemaskini Nama & Tarikh Program</h3>
+                <p class="text-xs text-slate-500">Data ini akan disimpan ke dalam tab <strong>PROGRAMTARIKH</strong> (Lajur A & B) dan dijadikan default bagi jawapan baharu.</p>
+            </div>
+            <form onsubmit="handleSaveProgramInfo(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Program (Lajur A)</label>
+                    <input type="text" id="inputNamaProgram" required placeholder="Cth: Bengkel Keusahawanan IEEP 2026" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tarikh Program (Lajur B)</label>
+                    <input type="text" id="inputTarikhProgram" required placeholder="Cth: 16 - 18 OKTOBER 2026" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeProgramModal()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-xs transition-all">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSaveProgram" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 rounded-lg text-xs transition-all shadow-md">
+                        Simpan Tetapan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- POP-UP MODAL KEPUTUSAN GENERATE OVERALL PDF REPORT (ADMIN) -->
+    <div id="overallPdfSuccessModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 text-center relative">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
+                <i class="fa-solid fa-file-circle-check text-3xl"></i>
+            </div>
+            <h3 class="text-base sm:text-lg font-extrabold text-slate-800 mb-2">Laporan Maklum Balas PDF Telah Berjaya!</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6" id="overallPdfText">
+                Laporan analisis penuh beserta gabungan semua borang individu telah berjaya dijana dan disimpan dalam Google Drive.
+            </p>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeOverallPdfModal()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs sm:text-sm transition-all">
+                    Tutup
+                </button>
+                <button type="button" id="btnDownloadOverallPdfTarget" onclick="openOverallPdfLink()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-md flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> Muat Turun
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP MODAL APABILA BORANG DITUTUP -->
     <div id="formClosedModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 text-center relative">
             <button onclick="closeFormClosedModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
@@ -363,13 +496,17 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzd4t36wV9RwHtIQhHL-vcS1odrV8HndSSJhcAd2iiroY0pjioh30FR3jShbxhED0FA/exec";
        
         let lastSubmittedPdfUrl = ""; 
-        let adminRecords = [];
+        let currentGeneratedOverallPdfUrl = "";
+        let rawAdminRecords = [];      
+        let filteredAdminRecords = []; 
         let currentRecordIndex = 0;
         let myChartInstance = null;
         let currentAdminPassword = "";
         let currentFormStatus = "OPEN";
+        let currentNamaProgram = "";
+        let currentTarikhProgram = "";
+        let selectedProgramFilter = "ALL";
 
-        // Petunjuk Soalan Rasmi (S1 - S8)
         const questionTextMap = {
             's1': '1. Objektif dan tujuan program IEEP diterangkan dengan jelas oleh pihak institusi sebelum pelaksanaan.',
             's2': '2. Komunikasi dan kerjasama antara pihak institusi dan industri berjalan dengan baik sepanjang pelaksanaan aktiviti.',
@@ -381,12 +518,11 @@
             's8': '8. Secara keseluruhan, pihak industri berpuas hati dengan pelaksanaan dan hasil program IEEP.'
         };
 
-        // BINA SOALAN S1 - S8 SECARA DINAMIK PADA BORANG FRONT-END
         const questionsList = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'];
         const qContainer = document.getElementById('questionsContainer');
 
         questionsList.forEach((qKey, index) => {
-            const colLabel = String.fromCharCode(67 + index); // Lajur C hingga J
+            const colLabel = String.fromCharCode(67 + index);
             let optionsHtml = '';
             for (let i = 1; i <= 5; i++) {
                 optionsHtml += `
@@ -417,7 +553,28 @@
             qContainer.appendChild(card);
         });
 
-        // Function Muat Turun PDF Manual
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchProgramInfoForPublic();
+        });
+
+        function fetchProgramInfoForPublic() {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: "getFormStatus" })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.namaProgram || resData.tarikhProgram) {
+                    currentNamaProgram = resData.namaProgram || "";
+                    currentTarikhProgram = resData.tarikhProgram || "";
+                    document.getElementById('publicNamaProgram').innerText = resData.namaProgram || "Belum Ditetapkan";
+                    document.getElementById('publicTarikhProgram').innerText = resData.tarikhProgram || "Belum Ditetapkan";
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
         function downloadPDFManual() {
             if (lastSubmittedPdfUrl) {
                 window.open(lastSubmittedPdfUrl, '_blank');
@@ -427,15 +584,24 @@
             }
         }
 
-        // Function Set Semula Form
         function resetForm() {
             document.getElementById('feedbackForm').reset();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Hantar Maklum Balas';
             lastSubmittedPdfUrl = "";
             document.getElementById('btnDownloadManual').classList.add('hidden');
             showToast('Borang telah diset semula.', 'info');
         }
 
-        // POP-UP FORM CLOSED HANDLER
+        function openRespondentSuccessModal() {
+            document.getElementById('respondentSuccessModal').classList.remove('hidden');
+        }
+
+        function closeRespondentSuccessModal() {
+            document.getElementById('respondentSuccessModal').classList.add('hidden');
+        }
+
         function openFormClosedModal() {
             document.getElementById('formClosedModal').classList.remove('hidden');
         }
@@ -444,7 +610,6 @@
             document.getElementById('formClosedModal').classList.add('hidden');
         }
 
-        // Function Hantar Form
         function handleSubmit(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -477,11 +642,9 @@
             })
             .then(res => res.json())
             .then(resData => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
-
-                // JIKA ADMIN TELAH MENUTUP BORANG -> PAPARKAN POP-UP MODAL
                 if (resData.result === 'closed' || resData.status === 'closed') {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
                     openFormClosedModal();
                     showToast('Borang maklum balas telah ditutup oleh pentadbir.', 'error');
                     return;
@@ -490,8 +653,18 @@
                 if (resData.pdfUrl) {
                     lastSubmittedPdfUrl = resData.pdfUrl;
                     document.getElementById('btnDownloadManual').classList.remove('hidden');
+                    document.getElementById('btnDownloadRespondentPdf').classList.remove('hidden');
+                } else {
+                    document.getElementById('btnDownloadRespondentPdf').classList.add('hidden');
                 }
-                showToast(`Maklum balas berjaya dihantar! PDF [${namaPegawai}.pdf] telah disimpan.`, 'success');
+
+                // Reset borang maklum balas secara automatik selepas hantar
+                document.getElementById('feedbackForm').reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Hantar Maklum Balas';
+
+                openRespondentSuccessModal();
+                showToast(`Maklum balas berjaya dihantar & direkodkan! PDF [${namaPegawai}.pdf] telah dikemaskini.`, 'success');
             })
             .catch(err => {
                 console.error(err);
@@ -501,7 +674,6 @@
             });
         }
 
-        // --- ADMIN & DASHBOARD CARTA FUNCTIONS ---
         function openAdminModal() {
             document.getElementById('adminModal').classList.remove('hidden');
         }
@@ -512,6 +684,30 @@
 
         function closeAdminPanel() {
             document.getElementById('adminPanelModal').classList.add('hidden');
+        }
+
+        function openProgramModal() {
+            document.getElementById('inputNamaProgram').value = currentNamaProgram;
+            document.getElementById('inputTarikhProgram').value = currentTarikhProgram;
+            document.getElementById('programInfoModal').classList.remove('hidden');
+        }
+
+        function closeProgramModal() {
+            document.getElementById('programInfoModal').classList.add('hidden');
+        }
+
+        function openOverallPdfModal() {
+            document.getElementById('overallPdfSuccessModal').classList.remove('hidden');
+        }
+
+        function closeOverallPdfModal() {
+            document.getElementById('overallPdfSuccessModal').classList.add('hidden');
+        }
+
+        function openOverallPdfLink() {
+            if (currentGeneratedOverallPdfUrl) {
+                window.open(currentGeneratedOverallPdfUrl, '_blank');
+            }
         }
 
         function switchAdminTab(tab) {
@@ -526,6 +722,7 @@
                 contentChart.classList.remove('hidden');
                 contentRecords.classList.add('hidden');
                 renderChartAndGuide();
+                renderPercentageTable();
             } else {
                 btnRecords.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm flex-1 sm:flex-none flex items-center justify-center gap-1.5";
                 btnChart.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 flex-1 sm:flex-none flex items-center justify-center gap-1.5";
@@ -555,14 +752,23 @@
                 if (resData.status === "success") {
                     currentAdminPassword = pass;
                     closeAdminModal();
-                    adminRecords = resData.data || [];
+                    rawAdminRecords = resData.data || [];
                     currentRecordIndex = 0;
                     currentFormStatus = resData.formStatus || "OPEN";
+                    currentNamaProgram = resData.namaProgram || "";
+                    currentTarikhProgram = resData.tarikhProgram || "";
                     
+                    populateProgramFilterOptions();
+                    applyProgramFilter();
+                    
+                    updateProgramDisplay();
                     updateFormStatusUI(currentFormStatus);
-                    updateOverviewStats();
                     document.getElementById('adminPanelModal').classList.remove('hidden');
                     switchAdminTab('chart');
+
+                    if (!currentNamaProgram || !currentTarikhProgram) {
+                        openProgramModal();
+                    }
                 } else {
                     showToast('Kata laluan salah. Sila cuba lagi.', 'error');
                 }
@@ -575,25 +781,149 @@
             });
         }
 
-        // UPDATE UI KAWALAN BUKA/TUTUP BORANG PADA PANEL ADMIN
+        function populateProgramFilterOptions() {
+            const selectElem = document.getElementById('programFilterSelect');
+            selectElem.innerHTML = '<option value="ALL">-- SEMUA PROGRAM (KESELURUHAN REKOD) --</option>';
+
+            const programList = [];
+            rawAdminRecords.forEach(r => {
+                let name = (r.namaProgram || "").trim();
+                if (name && !programList.includes(name)) {
+                    programList.push(name);
+                }
+            });
+
+            programList.sort().forEach(progName => {
+                const opt = document.createElement('option');
+                opt.value = progName;
+                opt.innerText = progName;
+                selectElem.appendChild(opt);
+            });
+        }
+
+        function onProgramFilterChange() {
+            selectedProgramFilter = document.getElementById('programFilterSelect').value;
+            applyProgramFilter();
+            currentRecordIndex = 0;
+            
+            const activeTabIsChart = !document.getElementById('adminTabChartContent').classList.contains('hidden');
+            if (activeTabIsChart) {
+                renderChartAndGuide();
+                renderPercentageTable();
+            } else {
+                renderRecord();
+            }
+        }
+
+        function applyProgramFilter() {
+            if (selectedProgramFilter === "ALL") {
+                filteredAdminRecords = [...rawAdminRecords];
+            } else {
+                filteredAdminRecords = rawAdminRecords.filter(r => (r.namaProgram || "").trim() === selectedProgramFilter);
+            }
+            updateOverviewStats();
+        }
+
+        function updateProgramDisplay() {
+            document.getElementById('displayNamaProgram').innerText = currentNamaProgram || "Belum Ditetapkan";
+            document.getElementById('displayTarikhProgram').innerText = currentTarikhProgram || "Belum Ditetapkan";
+            document.getElementById('publicNamaProgram').innerText = currentNamaProgram || "Belum Ditetapkan";
+            document.getElementById('publicTarikhProgram').innerText = currentTarikhProgram || "Belum Ditetapkan";
+        }
+
+        function handleSaveProgramInfo(e) {
+            e.preventDefault();
+            const namaProg = document.getElementById('inputNamaProgram').value.trim();
+            const tarikhProg = document.getElementById('inputTarikhProgram').value.trim();
+            const btnSave = document.getElementById('btnSaveProgram');
+
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: "updateProgramInfo",
+                    password: currentAdminPassword,
+                    namaProgram: namaProg,
+                    tarikhProgram: tarikhProg
+                })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Simpan Tetapan';
+                if (resData.status === "success") {
+                    currentNamaProgram = namaProg;
+                    currentTarikhProgram = tarikhProg;
+                    updateProgramDisplay();
+                    closeProgramModal();
+                    showToast('Tetapan Program berjaya disimpan dalam tab PROGRAMTARIKH!', 'success');
+                } else {
+                    showToast('Gagal menyimpan maklumat program.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Simpan Tetapan';
+                showToast('Ralat sambungan pelayan.', 'error');
+            });
+        }
+
+        function generateOverallPDFReportAction() {
+            const btn = document.getElementById('btnOverallPdf');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menjana PDF Gabungan...';
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: "generateOverallPdf",
+                    password: currentAdminPassword,
+                    selectedProgram: selectedProgramFilter
+                })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Muat Turun Laporan Keseluruhan (PDF)';
+
+                if (resData.status === "success" && resData.pdfUrl) {
+                    currentGeneratedOverallPdfUrl = resData.pdfUrl;
+                    document.getElementById('overallPdfText').innerText = `Laporan maklum balas PDF [${resData.fileName}] telah berjaya dijana dan disimpan dalam Google Drive.`;
+                    openOverallPdfModal();
+                } else {
+                    showToast('Gagal menjana laporan PDF keseluruhan.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Muat Turun Laporan Keseluruhan (PDF)';
+                showToast('Ralat sambungan pelayan.', 'error');
+            });
+        }
+
         function updateFormStatusUI(status) {
             const badge = document.getElementById('adminFormStatusBadge');
             const toggleBtn = document.getElementById('btnToggleFormStatus');
 
             if (status === "OPEN") {
-                badge.className = "px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200";
-                badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> DIBUKA';
-                toggleBtn.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm flex items-center gap-1.5";
-                toggleBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Tutup Borang Maklum Balas';
+                badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200";
+                badge.innerHTML = 'DIBUKA';
+                toggleBtn.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm flex items-center gap-1.5";
+                toggleBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Tutup Borang';
             } else {
-                badge.className = "px-3 py-1 rounded-full text-xs font-extrabold bg-red-100 text-red-800 border border-red-200";
-                badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> DITUTUP';
-                toggleBtn.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-1.5";
-                toggleBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Buka Borang Maklum Balas';
+                badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-800 border border-red-200";
+                badge.innerHTML = 'DITUTUP';
+                toggleBtn.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-1.5";
+                toggleBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Buka Borang';
             }
         }
 
-        // TUKAR STATUS BORANG DARI PANEL ADMIN
         function toggleFormStatusAction() {
             const targetStatus = (currentFormStatus === "OPEN") ? "CLOSED" : "OPEN";
             const btn = document.getElementById('btnToggleFormStatus');
@@ -624,10 +954,11 @@
         }
 
         function updateOverviewStats() {
-            document.getElementById('totalRecordsText').innerText = `Jumlah Responden: ${adminRecords.length}`;
-            document.getElementById('statTotalResponden').innerText = adminRecords.length;
+            const countResponden = filteredAdminRecords.length;
+            document.getElementById('totalRecordsText').innerText = `Jumlah Responden: ${countResponden} orang (Tapisan: ${selectedProgramFilter})`;
+            document.getElementById('statTotalResponden').innerText = `${countResponden} orang`;
 
-            if (adminRecords.length === 0) {
+            if (countResponden === 0) {
                 document.getElementById('statAvgScore').innerText = "0.0 / 5.0";
                 return;
             }
@@ -635,7 +966,7 @@
             let totalSum = 0;
             let count = 0;
 
-            adminRecords.forEach(r => {
+            filteredAdminRecords.forEach(r => {
                 questionsList.forEach(q => {
                     let val = parseFloat(r[q]);
                     if (!isNaN(val) && val > 0) {
@@ -649,13 +980,58 @@
             document.getElementById('statAvgScore').innerText = `${avg} / 5.0`;
         }
 
-        // JANAKAN CARTA BAR DINAMIK & PETUNJUK SOALAN MENGGUNAKAN FILTER
+        function renderPercentageTable() {
+            const tbody = document.getElementById('percentageTableBody');
+            const totalResponden = filteredAdminRecords.length;
+
+            if (totalResponden === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400">Tiada rekod data responden bagi program ini.</td></tr>';
+                return;
+            }
+
+            let rowsHtml = '';
+
+            questionsList.forEach((qKey, idx) => {
+                let counts = [0, 0, 0, 0, 0];
+                let sum = 0;
+                let answered = 0;
+
+                filteredAdminRecords.forEach(r => {
+                    let v = parseInt(r[qKey], 10);
+                    if (v >= 1 && v <= 5) {
+                        counts[v - 1]++;
+                        sum += v;
+                        answered++;
+                    }
+                });
+
+                let avgScore = answered > 0 ? (sum / answered).toFixed(2) : '0.00';
+
+                let colsHtml = '';
+                counts.forEach(cnt => {
+                    let pct = totalResponden > 0 ? ((cnt / totalResponden) * 100).toFixed(1) : '0.0';
+                    colsHtml += `<td class="p-2.5 text-center font-bold text-slate-700">${cnt} <span class="text-[10px] font-semibold text-blue-600 block">(${pct}%)</span></td>`;
+                });
+
+                rowsHtml += `
+                    <tr class="hover:bg-slate-50 transition-all">
+                        <td class="p-2.5 text-center font-bold text-slate-800">S${idx + 1}</td>
+                        <td class="p-2.5 font-medium text-slate-700 text-[11px]">${questionTextMap[qKey]}</td>
+                        ${colsHtml}
+                        <td class="p-2.5 text-center font-extrabold text-blue-900 bg-blue-50">${avgScore}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = rowsHtml;
+        }
+
         function renderChartAndGuide() {
             const selectedFilter = document.getElementById('questionFilter').value;
             const guideTextElem = document.getElementById('questionGuideText');
 
             if (selectedFilter === 'ALL') {
-                guideTextElem.innerHTML = `<strong>Pilihan: Semua Soalan (S1 hingga S8)</strong><br>Carta memaparkan <em>Purata Skor Skala Likert (1 - 5)</em> bagi kesemua 8 soalan daripada Lajur C hingga Lajur J.`;
+                guideTextElem.innerHTML = `<strong>Pilihan: Semua Soalan (S1 hingga S8)</strong><br>Carta memaparkan <em>Purata Skor Skala Likert (1 - 5)</em> bagi kesemua 8 soalan (Program: ${selectedProgramFilter}).`;
             } else {
                 guideTextElem.innerHTML = `<strong>Petunjuk Soalan (${selectedFilter.toUpperCase()}):</strong><br>${questionTextMap[selectedFilter]}`;
             }
@@ -669,25 +1045,25 @@
             const multiBarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1'];
 
             if (selectedFilter === 'ALL') {
-                chartTitle = 'Purata Skor Bagi Setiap Soalan (S1 - S8)';
+                chartTitle = `Purata Skor Setiap Soalan (${selectedProgramFilter})`;
                 labels = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'];
                 backgroundColors = multiBarColors;
 
                 chartData = questionsList.map(q => {
                     let sum = 0, c = 0;
-                    adminRecords.forEach(r => {
+                    filteredAdminRecords.forEach(r => {
                         let v = parseFloat(r[q]);
                         if (!isNaN(v) && v > 0) { sum += v; c++; }
                     });
                     return c > 0 ? (sum / c).toFixed(2) : 0;
                 });
             } else {
-                chartTitle = `Taburan Skor Responden Bagi Soalan ${selectedFilter.toUpperCase()}`;
-                labels = ['Skor 1 (Sangat Tidak Setuju)', 'Skor 2 (Tidak Setuju)', 'Skor 3 (Neutral)', 'Skor 4 (Setuju)', 'Skor 5 (Sangat Setuju)'];
+                chartTitle = `Taburan Skor ${selectedFilter.toUpperCase()} (${selectedProgramFilter})`;
+                labels = ['Skor 1 (Sgt Tdk Setuju)', 'Skor 2 (Tidak Setuju)', 'Skor 3 (Neutral)', 'Skor 4 (Setuju)', 'Skor 5 (Sangat Setuju)'];
                 backgroundColors = vibrantColors;
 
                 let scoreCounts = [0, 0, 0, 0, 0];
-                adminRecords.forEach(r => {
+                filteredAdminRecords.forEach(r => {
                     let v = parseInt(r[selectedFilter], 10);
                     if (v >= 1 && v <= 5) {
                         scoreCounts[v - 1]++;
@@ -723,7 +1099,7 @@
                         title: {
                             display: true,
                             text: chartTitle,
-                            font: { size: 14, weight: 'bold' },
+                            font: { size: 13, weight: 'bold' },
                             color: '#1e293b'
                         }
                     },
@@ -739,26 +1115,25 @@
             });
         }
 
-        // --- PAPARAN REKOD INDIVIDU ---
         function renderRecord() {
             const viewer = document.getElementById('recordViewer');
             const counter = document.getElementById('recordCounter');
             const btnPrev = document.getElementById('btnPrev');
             const btnNext = document.getElementById('btnNext');
 
-            if (adminRecords.length === 0) {
+            if (filteredAdminRecords.length === 0) {
                 counter.innerText = '0 / 0';
                 btnPrev.disabled = true;
                 btnNext.disabled = true;
-                viewer.innerHTML = '<div class="text-center py-12 text-slate-500 font-medium">Tiada rekod jawapan dijumpai dalam Google Spreadsheet.</div>';
+                viewer.innerHTML = '<div class="text-center py-12 text-slate-500 font-medium">Tiada rekod jawapan dijumpai bagi program ini.</div>';
                 return;
             }
 
-            counter.innerText = `${currentRecordIndex + 1} / ${adminRecords.length}`;
+            counter.innerText = `${currentRecordIndex + 1} / ${filteredAdminRecords.length}`;
             btnPrev.disabled = (currentRecordIndex === 0);
-            btnNext.disabled = (currentRecordIndex === adminRecords.length - 1);
+            btnNext.disabled = (currentRecordIndex === filteredAdminRecords.length - 1);
 
-            const rec = adminRecords[currentRecordIndex];
+            const rec = filteredAdminRecords[currentRecordIndex];
 
             viewer.innerHTML = `
                 <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 space-y-4">
@@ -767,7 +1142,10 @@
                             <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Lajur M</span>
                             <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-clock mr-1"></i> Masa Hantar: <strong>${rec.tarikhMasa || 'Tiada Rekod'}</strong></p>
                         </div>
-                        ${rec.pdfUrl ? `<a href="${rec.pdfUrl}" target="_blank" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-file-pdf"></i> Buka Link PDF (Lajur N)</a>` : '<span class="text-xs text-slate-400">Tiada Link PDF</span>'}
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">Lajur O</span>
+                            <p class="text-xs font-bold text-slate-800 mt-1"><i class="fa-solid fa-graduation-cap mr-1"></i> ${rec.namaProgram || '-'}</p>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -813,13 +1191,13 @@
         function navigateRecord(direction) {
             currentRecordIndex += direction;
             if (currentRecordIndex < 0) currentRecordIndex = 0;
-            if (currentRecordIndex >= adminRecords.length) currentRecordIndex = adminRecords.length - 1;
+            if (currentRecordIndex >= filteredAdminRecords.length) currentRecordIndex = filteredAdminRecords.length - 1;
             renderRecord();
         }
 
         function downloadCurrentRecordPDF() {
-            if (adminRecords.length === 0) return;
-            const rec = adminRecords[currentRecordIndex];
+            if (filteredAdminRecords.length === 0) return;
+            const rec = filteredAdminRecords[currentRecordIndex];
             if (rec.pdfUrl) {
                 window.open(rec.pdfUrl, '_blank');
                 showToast(`Membuka PDF untuk ${rec.namaPegawai}...`, 'success');
@@ -828,22 +1206,6 @@
             }
         }
 
-        function downloadBulkPDFs() {
-            if (adminRecords.length === 0) {
-                showToast('Tiada rekod untuk dimuat turun.', 'error');
-                return;
-            }
-            let openedCount = 0;
-            adminRecords.forEach(rec => {
-                if (rec.pdfUrl) {
-                    window.open(rec.pdfUrl, '_blank');
-                    openedCount++;
-                }
-            });
-            showToast(`Membuka ${openedCount} fail PDF secara pukal.`, 'success');
-        }
-
-        // Helper Notification Toast
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toastMsg');
